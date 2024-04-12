@@ -7,27 +7,27 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() order: Order) {
-    return this.ordersService.create(order);
+  async create(@Body() order: Order): Promise<void> {
+    return await this.ordersService.create(order);
   }
 
   @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  async findAll(): Promise<Order[]> {
+    return await this.ordersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<Order> {
+    return await this.ordersService.findOne(+id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() order: Order) {
-    return this.ordersService.update(+id, order);
+  async update(@Param('id') id: string, @Body() order: Order): Promise<Order> {
+    return await this.ordersService.update(+id, order);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
+  async remove(@Param('id') id: string): Promise<void> {
+    return await this.ordersService.remove(+id);
   }
 }
