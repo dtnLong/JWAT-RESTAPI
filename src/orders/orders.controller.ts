@@ -1,14 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseFilters, ForbiddenException } from '@nestjs/common';
+import { HttpExceptionFilter } from "../common/http-exception.filter"
 import { OrdersService } from './orders.service';
 import { Order } from './entities/order.entity';
+import { ResponseInterface } from 'src/common/response';
 
 @Controller('api/orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  async create(@Body() order: Order): Promise<void> {
-    return await this.ordersService.create(order);
+  @UseFilters(HttpExceptionFilter)
+  async create(@Body() order: Partial<Order>): Promise<ResponseInterface> {
+    await this.ordersService.create(order);
+    return {
+      status: 201,
+      data: null,
+      error: null
+    }
   }
 
   @Get()

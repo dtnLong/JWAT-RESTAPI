@@ -11,6 +11,9 @@ export class Order {
   @Column({ name: "created_date", type: "timestamp" })
   createdDate: Date;
 
+  @Column({ name: "last_updated", type: "timestamp" })
+  lastUpdated: Date;
+
   @Column({ name: "payment_type" })
   paymentType: string;
 

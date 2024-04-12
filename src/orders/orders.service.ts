@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -12,8 +12,10 @@ export class OrdersService {
     private ordersRepository: Repository<Order>,
   ) {}
 
-  async create(order: Order): Promise<void> {
-    await this.ordersRepository.save(order);
+  async create(order: Partial<Order>): Promise<void> {
+    order.createdDate = new Date();
+    order.lastUpdated = new Date();
+    await this.ordersRepository.insert(order);
   }
 
   async findAll(): Promise<Order[]> {
@@ -25,6 +27,7 @@ export class OrdersService {
   }
 
   async update(id: number, order: Partial<Order>): Promise<Order> {
+    order.lastUpdated = new Date();
     await this.ordersRepository.update(id, order);
     return await this.ordersRepository.findOneBy({id});
   }
