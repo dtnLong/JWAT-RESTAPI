@@ -6,7 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [OrdersModule, ConfigModule.forRoot({
-      envFilePath: './config/.local.env',
+      envFilePath: './.env',
     }), TypeOrmModule.forRoot({
       type: process.env.DB_TYPE as any,
       host: process.env.DB_HOST,
