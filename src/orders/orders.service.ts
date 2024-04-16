@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, UnorderedBulkOperation } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './entities/order.entity';
-import { ORDER_PAYMENT_TYPE } from 'src/common/constants';
+import { ORDER_STATUS } from 'src/common/constants';
 
 @Injectable()
 export class OrdersService {
@@ -14,26 +14,16 @@ export class OrdersService {
     private dataSource: DataSource
   ) {}
 
-  #validateInput(orderPaymentType: string, orderStatus: string): void {
-    if (orderPaymentType != null && ORDER_PAYMENT_TYPE[orderPaymentType.toUpperCase()] === undefined) {
-      throw new BadRequestException("Invalid payment type!");
-    }
-
-    if (orderStatus != null && ORDER_PAYMENT_TYPE[orderStatus.toUpperCase()] === undefined) {
-      throw new BadRequestException("Invalid status!");
-    }
-  }
-
   async create(orderDto: CreateOrderDto): Promise<Partial<Order>> {
     let createdOrder: Order;
     await this.dataSource.transaction(async manager => {
       let order: Partial<Order> = { ...orderDto }
 
-      this.#validateInput(order.paymentType, order.status);
-
       order.createdDate = new Date();
       order.lastUpdated = new Date();
+      order.status = ORDER_STATUS.PENDING;
       createdOrder = await manager.save(Order, order);
+      createdOrder = await manager.findOneBy(Order, {id: createdOrder.id})
     })
     return createdOrder;
   }
@@ -54,16 +44,16 @@ export class OrdersService {
     let updatedValue: Order;
     await this.dataSource.transaction(async manager => {
       let order: Partial<Order> = await manager.findOneBy(Order, {id: id});
+      
       if (order == null) {
-        throw new NotFoundException("Order Id not found!");
+        throw new NotFoundException("Order not found!");
       }
 
-      this.#validateInput(orderDto.paymentType, orderDto.status);
-
-      order = { ...orderDto }
+      order = { ...order, ...orderDto }
       order.lastUpdated = new Date();
 
-      updatedValue = await manager.save(Order, order);
+      await manager.save(Order, order);
+      updatedValue = await manager.findOneBy(Order, {id: id});
     });
     return updatedValue;
   }
@@ -72,10 +62,10 @@ export class OrdersService {
     await this.dataSource.transaction(async manager => {
       const order = await manager.findOneBy(Order, {id: id});
       if (order == null) {
-        throw new NotFoundException("Order Id not found!");
+        throw new NotFoundException("Order not found!");
       }
-
-      await manager.remove(id);
+      
+      await manager.delete(Order, {id: id});
     });
   }
 }

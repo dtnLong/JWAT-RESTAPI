@@ -32,7 +32,7 @@ export class OrdersController {
     }
   }
 
-  @Get(':id')
+  @Get('/:id')
   @UseFilters(HttpExceptionFilter)
   async findOne(@Param() params: IdParam): Promise<ResponseInterface> {
     return {
@@ -44,20 +44,21 @@ export class OrdersController {
 
   @Put('/:id')
   @UseFilters(HttpExceptionFilter)
-  async update(@Param('id') id: IdParam, @Body() order: UpdateOrderDto): Promise<ResponseInterface> {
+  async update(@Param() params: IdParam, @Body() order: UpdateOrderDto): Promise<ResponseInterface> {
     return {
       status: HttpStatus.OK,
-      data: await this.ordersService.update(+id, order),
+      data: await this.ordersService.update(params.id, order),
       error: null
     }
   }
 
   @Delete('/:id')
   @UseFilters(HttpExceptionFilter)
-  async remove(@Param('id') id: IdParam): Promise<ResponseInterface> {
+  async remove(@Param() params: IdParam): Promise<ResponseInterface> {
+    await this.ordersService.remove(params.id)
     return {
       status: HttpStatus.OK,
-      data: await this.ordersService.remove(+id),
+      data: null,
       error: null
     }
   }

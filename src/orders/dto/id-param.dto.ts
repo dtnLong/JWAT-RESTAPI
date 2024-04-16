@@ -1,7 +1,6 @@
-import { IsNumberString, IsPositive } from 'class-validator';
+import { IsNumberString } from 'class-validator';
 
 export class IdParam {
-  @IsNumberString({}, { message: "Id must be a number!" })
-  @IsPositive({ message: "Id must be a positive number!" })
+  @IsNumberString({ no_symbols: true }, { message: "Invalid order Id!" })
   id: number;
 }
