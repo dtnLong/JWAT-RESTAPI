@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, UseFilters, HttpStatus } from '@nestjs/common';
-import { HttpExceptionFilter } from "../common/http-exception.filter"
+import { HttpExceptionFilter } from "src/common/http-exception.filter"
 import { OrdersService } from './orders.service';
-import { Order } from './entities/order.entity';
 import { ResponseInterface } from 'src/common/response';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { IdParam } from 'src/orders/dto/id-param.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Controller('api/orders')
 export class OrdersController {
@@ -10,16 +12,18 @@ export class OrdersController {
 
   @Post()
   @UseFilters(HttpExceptionFilter)
-  async create(@Body() order: Partial<Order>): Promise<ResponseInterface> {
-    await this.ordersService.create(order);
+  async create(@Body() order: CreateOrderDto): Promise<ResponseInterface> {
+    console.log(order);
+    
     return {
       status: HttpStatus.CREATED,
-      data: null,
+      data: await this.ordersService.create(order),
       error: null
     }
   }
 
   @Get()
+  @UseFilters(HttpExceptionFilter)
   async findAll(): Promise<ResponseInterface> {
     return {
       status: HttpStatus.OK,
@@ -29,16 +33,18 @@ export class OrdersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseInterface> {
+  @UseFilters(HttpExceptionFilter)
+  async findOne(@Param() params: IdParam): Promise<ResponseInterface> {
     return {
       status: HttpStatus.OK,
-      data: await this.ordersService.findOne(+id),
+      data: await this.ordersService.findOne(params.id),
       error: null
     }
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() order: Order): Promise<ResponseInterface> {
+  @Put('/:id')
+  @UseFilters(HttpExceptionFilter)
+  async update(@Param('id') id: IdParam, @Body() order: UpdateOrderDto): Promise<ResponseInterface> {
     return {
       status: HttpStatus.OK,
       data: await this.ordersService.update(+id, order),
@@ -46,8 +52,9 @@ export class OrdersController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ResponseInterface> {
+  @Delete('/:id')
+  @UseFilters(HttpExceptionFilter)
+  async remove(@Param('id') id: IdParam): Promise<ResponseInterface> {
     return {
       status: HttpStatus.OK,
       data: await this.ordersService.remove(+id),
