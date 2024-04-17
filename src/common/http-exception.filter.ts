@@ -11,6 +11,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionMsg = exception.getResponse();
     
+    // Compose custom response for http error
     const responseJSON: ResponseInterface = {
         status: status,
         data: null,

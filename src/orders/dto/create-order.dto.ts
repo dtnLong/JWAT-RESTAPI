@@ -3,6 +3,7 @@ import { ORDER_PAYMENT_TYPE_ARR } from "src/common/constants";
 
 export class CreateOrderDto {
     @IsNumber({}, { message: "Invalid customer Id!" })
+    @Min(1, { message: "Invalid customer Id!" })
     @IsNotEmpty({ message: "Invalid customer Id!" })
     customerId: number;
 

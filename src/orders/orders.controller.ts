@@ -13,8 +13,6 @@ export class OrdersController {
   @Post()
   @UseFilters(HttpExceptionFilter)
   async create(@Body() order: CreateOrderDto): Promise<ResponseInterface> {
-    console.log(order);
-    
     return {
       status: HttpStatus.CREATED,
       data: await this.ordersService.create(order),
@@ -55,10 +53,9 @@ export class OrdersController {
   @Delete('/:id')
   @UseFilters(HttpExceptionFilter)
   async remove(@Param() params: IdParam): Promise<ResponseInterface> {
-    await this.ordersService.remove(params.id)
     return {
       status: HttpStatus.OK,
-      data: null,
+      data: await this.ordersService.remove(params.id),
       error: null
     }
   }

@@ -14,24 +14,40 @@ export class OrdersService {
     private dataSource: DataSource
   ) {}
 
-  async create(orderDto: CreateOrderDto): Promise<Partial<Order>> {
+  /**
+   * Create a new order in Orders table
+   * 
+   * @param {CreateOrderDto} orderDto order property to be created
+   * @returns {Promise<Order>} Created order
+   */
+  async create(orderDto: CreateOrderDto): Promise<Order> {
     let createdOrder: Order;
     await this.dataSource.transaction(async manager => {
       let order: Partial<Order> = { ...orderDto }
-
       order.createdDate = new Date();
       order.lastUpdated = new Date();
       order.status = ORDER_STATUS.PENDING;
+      
       createdOrder = await manager.save(Order, order);
       createdOrder = await manager.findOneBy(Order, {id: createdOrder.id})
     })
     return createdOrder;
   }
 
+  /**
+   * Return all order from the Orders table
+   * @returns {Order[]} Created order
+   */
   async findAll(): Promise<Order[]> {
     return await this.ordersRepository.find();
   }
 
+  /**
+   * Return an order by order id from the Orders table
+   * @param {number} id order id
+   * @returns {Order} An order with the order id
+   * @throws {NotFoundException} If the order is not found with the id
+   */
   async findOne(id: number): Promise<Order> {
     const order = await this.ordersRepository.findOneBy({id})
     if (order == null) {
@@ -40,15 +56,24 @@ export class OrdersService {
     return order;
   }
 
+  /**
+   * Update an order with the order id in the Orders table
+   * @param {number} id order id
+   * @param {UpdateOrderDto} orderDto order property to be updated
+   * @returns {Order} Updated order
+   * @throws {NotFoundException} If the order is not found with the id
+   */
   async update(id: number, orderDto: UpdateOrderDto): Promise<Order> {
     let updatedValue: Order;
     await this.dataSource.transaction(async manager => {
+      // Validate that order exist
       let order: Partial<Order> = await manager.findOneBy(Order, {id: id});
-      
       if (order == null) {
         throw new NotFoundException("Order not found!");
       }
 
+      // Overwrite current order with new properties value
+      // Then update last updated date
       order = { ...order, ...orderDto }
       order.lastUpdated = new Date();
 
@@ -58,14 +83,22 @@ export class OrdersService {
     return updatedValue;
   }
 
-  async remove(id: number): Promise<void> {
+  /**
+   * Remove an order with the order id from Orders table
+   * @param {number} id order id
+   * @throws {NotFoundException} If the order is not found with the id
+   * @returns {Promise<Order>} Removed order
+   */
+  async remove(id: number): Promise<Order> {
+    let order: Order;
     await this.dataSource.transaction(async manager => {
-      const order = await manager.findOneBy(Order, {id: id});
+      order = await manager.findOneBy(Order, {id: id});
       if (order == null) {
         throw new NotFoundException("Order not found!");
       }
       
       await manager.delete(Order, {id: id});
     });
+    return order;
   }
 }
