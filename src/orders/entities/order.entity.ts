@@ -8,10 +8,10 @@ export class Order {
   @Column({ name: "customer_id" })
   customerId: number;
 
-  @Column({ name: "created_date", type: "timestamp" })
+  @Column({ name: "created_date", type: "timestamptz" })
   createdDate: Date;
 
-  @Column({ name: "last_updated", type: "timestamp" })
+  @Column({ name: "last_updated", type: "timestamptz" })
   lastUpdated: Date;
 
   @Column({ name: "payment_type" })
@@ -20,6 +20,9 @@ export class Order {
   @Column()
   status: string;
 
-  @Column()
+  @Column('decimal', {
+    precision: 14,
+    scale: 2,
+  })
   total: number;
 }

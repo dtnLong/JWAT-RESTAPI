@@ -5,6 +5,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './entities/order.entity';
 import { ORDER_STATUS } from 'src/common/constants';
+import { removeNullProperties } from 'src/util/remove-null-props';
 
 @Injectable()
 export class OrdersService {
@@ -26,7 +27,7 @@ export class OrdersService {
       let order: Partial<Order> = { ...orderDto }
       order.createdDate = new Date();
       order.lastUpdated = new Date();
-      order.status = ORDER_STATUS.PENDING;
+      order.status = ORDER_STATUS.ACCEPTED;
       
       createdOrder = await manager.save(Order, order);
       createdOrder = await manager.findOneBy(Order, {id: createdOrder.id})
@@ -49,10 +50,13 @@ export class OrdersService {
    * @throws {NotFoundException} If the order is not found with the id
    */
   async findOne(id: number): Promise<Order> {
-    const order = await this.ordersRepository.findOneBy({id})
+    const order = await this.ordersRepository.findOneBy({id});
+
+    // Validate that order exist
     if (order == null) {
       throw new NotFoundException("Order not found!");
     }
+
     return order;
   }
 
@@ -66,15 +70,17 @@ export class OrdersService {
   async update(id: number, orderDto: UpdateOrderDto): Promise<Order> {
     let updatedValue: Order;
     await this.dataSource.transaction(async manager => {
-      // Validate that order exist
       let order: Partial<Order> = await manager.findOneBy(Order, {id: id});
+
+      // Validate that order exist
       if (order == null) {
         throw new NotFoundException("Order not found!");
       }
 
       // Overwrite current order with new properties value
       // Then update last updated date
-      order = { ...order, ...orderDto }
+      orderDto = removeNullProperties(orderDto);
+      order = { ...order, ...orderDto };
       order.lastUpdated = new Date();
 
       await manager.save(Order, order);
@@ -93,6 +99,8 @@ export class OrdersService {
     let order: Order;
     await this.dataSource.transaction(async manager => {
       order = await manager.findOneBy(Order, {id: id});
+
+      // Validate that order exist
       if (order == null) {
         throw new NotFoundException("Order not found!");
       }

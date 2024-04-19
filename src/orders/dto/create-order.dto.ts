@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsIn, Min } from "class-validator";
+import { IsNotEmpty, IsNumber, IsIn, Min, IsString } from "class-validator";
 import { ORDER_PAYMENT_TYPE_ARR } from "src/common/constants";
 
 export class CreateOrderDto {
@@ -8,6 +8,7 @@ export class CreateOrderDto {
     customerId: number;
 
     @IsIn(ORDER_PAYMENT_TYPE_ARR, { message: "Invalid payment type!"})
+    @IsString({ message: "Invalid payment type!"})
     @IsNotEmpty({ message: "Invalid payment type!" })
     paymentType: string;
 
