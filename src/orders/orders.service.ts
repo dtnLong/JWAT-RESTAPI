@@ -25,8 +25,6 @@ export class OrdersService {
     let createdOrder: Order;
     await this.dataSource.transaction(async manager => {
       let order: Partial<Order> = { ...orderDto }
-      order.createdDate = new Date();
-      order.lastUpdated = new Date();
       order.status = ORDER_STATUS.ACCEPTED;
       
       createdOrder = await manager.save(Order, order);
@@ -83,11 +81,10 @@ export class OrdersService {
         throw new NotFoundException("Order not found!");
       }
 
+      // Remove all null properties from input
       // Overwrite current order with new properties value
-      // Then update last updated date
       orderDto = removeNullProperties(orderDto);
       order = { ...order, ...orderDto };
-      order.lastUpdated = new Date();
 
       await manager.save(Order, order);
       updatedValue = await manager.findOneBy(Order, {id: id});
@@ -96,7 +93,7 @@ export class OrdersService {
   }
 
   /**
-   * Remove an order with the order id from Orders table
+   * Remove (Soft delete) an order with the order id from Orders table
    * @param {number} id order id
    * @throws {NotFoundException} If the order is not found with the id
    * @returns {Promise<Order>} Removed order
@@ -110,8 +107,7 @@ export class OrdersService {
       if (order == null) {
         throw new NotFoundException("Order not found!");
       }
-      
-      await manager.delete(Order, {id: id});
+      await manager.softDelete(Order, {id: id})
     });
     return order;
   }
