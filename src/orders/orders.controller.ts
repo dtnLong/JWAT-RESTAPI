@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseFilters, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseFilters, HttpStatus, Patch, Query } from '@nestjs/common';
 import { HttpExceptionFilter } from "src/common/http-exception.filter"
 import { OrdersService } from './orders.service';
 import { ResponseInterface } from 'src/common/response';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { IdParam } from 'src/orders/dto/id-param.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { findAllDto } from './dto/find-all.dto';
 
 @Controller('api/orders')
 export class OrdersController {
@@ -22,10 +23,10 @@ export class OrdersController {
 
   @Get()
   @UseFilters(HttpExceptionFilter)
-  async findAll(): Promise<ResponseInterface> {
+  async findAll(@Query() queries?: findAllDto): Promise<ResponseInterface> {
     return {
       status: HttpStatus.OK,
-      data: await this.ordersService.findAll(),
+      data: await this.ordersService.findAll(queries.search),
       error: null
     }
   }

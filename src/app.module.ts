@@ -1,7 +1,6 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { OrdersModule } from './orders/orders.module';
-import { Order } from "./orders/entities/order.entity";
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -14,7 +13,7 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Order]
+      entities: [__dirname + '/**/*.entity{.ts,.js}']
   })]
 })
 export class AppModule {}

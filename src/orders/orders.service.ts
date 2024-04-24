@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './entities/order.entity';
@@ -37,10 +37,16 @@ export class OrdersService {
 
   /**
    * Return all order from the Orders table
+   * @param {string} search search param for payment and status
    * @returns {Order[]} Created order
    */
-  async findAll(): Promise<Order[]> {
-    return await this.ordersRepository.find();
+  async findAll(search?: string): Promise<Order[]> {
+    return await this.ordersRepository.find({
+      where: [
+        {paymentType: ILike(`%${search}%`)},
+        {status: ILike(`%${search}%`)}
+      ]}
+    );
   }
 
   /**
